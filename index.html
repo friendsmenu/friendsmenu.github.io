@@ -455,11 +455,21 @@ html[data-theme="light"] .sec-hero h2{text-shadow:0 2px 18px rgba(255,255,255,.4
   <div id="sres"></div>
 </div>
 
-<script src="data.js"></script>
 <script>
-const D = window.MENU_DATA, $ = s => document.querySelector(s);
-const CUR = D.brand.currency;
+const $ = s => document.querySelector(s);
+let D = null;
+let CUR = 'ج';
 let curSec = null;
+
+/* Menu text is data-driven (data/menu.json, editable from admin.html),
+   so every value is escaped before it reaches innerHTML. */
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const escAttr = esc;
+const safeUrl = u => /^https?:\/\//i.test(String(u||'')) ? String(u) : '#';
+const safeTel = p => String(p||'').replace(/[^0-9+]/g,'');
+const safeId = s => /^[a-z0-9_-]+$/i.test(String(s||'')) ? String(s) : '';
 
 /* ---------- splash ---------- */
 (function(){
@@ -492,34 +502,36 @@ const itemCount = sec => sec.cats.reduce((a,c)=>a+c.items.length,0);
 const priceHTML = it => {
   if(it.s){
     return `<div class="sizes">${it.s.map(v =>
-      v==null ? `<div class="sp empty"><b>—</b></div>` : `<div class="sp"><b>${v}</b></div>`
+      v==null ? `<div class="sp empty"><b>—</b></div>` : `<div class="sp"><b>${esc(v)}</b></div>`
     ).join("")}</div>`;
   }
-  return `<div class="price">${it.p}<small>${CUR}</small></div>`;
+  return `<div class="price">${esc(it.p)}<small>${esc(CUR)}</small></div>`;
 };
 const itemHTML = (it,i) => `
-  <div class="item" style="animation-delay:${Math.min(i*0.03,0.35)}s" data-name="${it.n}">
+  <div class="item" style="animation-delay:${Math.min(i*0.03,0.35)}s">
     <div class="tx">
-      <div class="nm">${it.n}${it.tag?`<span class="tag">${it.tag}</span>`:""}</div>
-      ${it.d?`<div class="ds">${it.d}</div>`:""}
+      <div class="nm">${esc(it.n)}${it.tag?`<span class="tag">${esc(it.tag)}</span>`:""}</div>
+      ${it.d?`<div class="ds">${esc(it.d)}</div>`:""}
     </div>
     ${priceHTML(it)}
   </div>`;
 
 /* ---------- home grid ---------- */
-$("#grid").innerHTML = D.sections.map((s,i)=>`
-  <div class="sec-card" style="animation-delay:${i*0.07}s" onclick="openSec('${s.id}')">
-    <div class="ph">
-      <img src="${s.img}" alt="${s.title}" loading="lazy" onerror="this.outerHTML='<div class=fallback>${s.emoji}</div>'">
-    </div>
-    <div class="shade"></div>
-    <span class="count">${itemCount(s)} صنف</span>
-    <div class="info"><h3>${s.title}</h3><p>${s.desc}</p></div>
-  </div>`).join("");
+function renderHome(){
+  $("#grid").innerHTML = D.sections.map((s,i)=>`
+    <div class="sec-card" style="animation-delay:${i*0.07}s" data-sec="${escAttr(s.id)}" role="button" tabindex="0">
+      <div class="ph">
+        <img src="${escAttr(s.img)}" alt="${escAttr(s.title)}" loading="lazy" onerror="this.outerHTML='&lt;div class=fallback&gt;${escAttr(s.emoji)}&lt;/div&gt;'">
+      </div>
+      <div class="shade"></div>
+      <span class="count">${esc(itemCount(s))} صنف</span>
+      <div class="info"><h3>${esc(s.title)}</h3><p>${esc(s.desc)}</p></div>
+    </div>`).join("");
 
-/* ---------- bottom nav ---------- */
-$("#bottomnav").innerHTML = D.sections.map(s=>
-  `<div class="b" data-sec="${s.id}" onclick="openSec('${s.id}')">${s.emoji} ${s.title}</div>`).join("");
+  /* ---------- bottom nav ---------- */
+  $("#bottomnav").innerHTML = D.sections.map(s=>
+    `<div class="b" data-sec="${escAttr(s.id)}">${esc(s.emoji)} ${esc(s.title)}</div>`).join("");
+}
 
 /* ---------- section view ---------- */
 function openSec(id, focusItem){
@@ -531,24 +543,24 @@ function openSec(id, focusItem){
   v.classList.remove("on"); void v.offsetWidth; v.classList.add("on");
 
   $("#secHero").innerHTML = `
-    <img src="${s.img}" alt="" onerror="this.outerHTML='<div class=fallback>${s.emoji}</div>'">
+    <img src="${escAttr(s.img)}" alt="" onerror="this.outerHTML='&lt;div class=fallback&gt;${escAttr(s.emoji)}&lt;/div&gt;'">
     <div class="shade"></div>
-    <div class="t"><div><h2>${s.emoji} ${s.title}</h2><div class="d">${s.desc}</div></div></div>`;
+    <div class="t"><div><h2>${esc(s.emoji)} ${esc(s.title)}</h2><div class="d">${esc(s.desc)}</div></div></div>`;
 
   $("#subtabs").innerHTML =
     `<button class="chip" onclick="goHome()">→ الرئيسية</button>` +
-    s.cats.map((c,i)=>`<button class="chip${i===0?" on":""}" data-cat="${c.id}" onclick="jumpCat('${c.id}',this)">
-      ${c.title}${c.isNew?`<span class="nw">NEW</span>`:""}</button>`).join("");
+    s.cats.map((c,i)=>`<button class="chip${i===0?" on":""}" data-cat="${escAttr(c.id)}">
+      ${esc(c.title)}${c.isNew?`<span class="nw">NEW</span>`:""}</button>`).join("");
 
   $("#secBody").innerHTML = s.cats.map(c=>`
-    <div class="catblock" id="cat-${c.id}">
+    <div class="catblock" id="cat-${escAttr(c.id)}">
       <div class="cat-head">
-        <div class="bar"></div><h3>${c.title}</h3>
+        <div class="bar"></div><h3>${esc(c.title)}</h3>
         ${c.isNew?`<span class="newpill">NEW</span>`:""}
-        <span class="n">${c.items.length} صنف</span>
+        <span class="n">${esc(c.items.length)} صنف</span>
       </div>
       ${s.sized && c.items.some(i=>i.s) ? `<div class="sizelegend"><span>S</span><span>M</span><span>L</span></div>` : ""}
-      ${c.items.map(itemHTML).join("")}
+      ${c.items.map((it,i)=>itemHTML(it,i)).join("")}
     </div>`).join("");
 
   document.querySelectorAll("#bottomnav .b").forEach(b=>b.classList.toggle("on", b.dataset.sec===id));
@@ -557,7 +569,7 @@ function openSec(id, focusItem){
 
   if(focusItem){
     setTimeout(()=>{
-      const el = [...document.querySelectorAll("#secBody .item")].find(e=>e.dataset.name===focusItem);
+      const el = [...document.querySelectorAll("#secBody .item .nm")].find(e=>e.textContent===focusItem)?.closest(".item");
       if(el){ el.scrollIntoView({behavior:"smooth", block:"center"}); el.classList.add("hl");
         setTimeout(()=>el.classList.remove("hl"), 2600); }
     }, 120);
@@ -567,7 +579,7 @@ function openSec(id, focusItem){
 
 function jumpCat(cid, chip){
   document.querySelectorAll("#subtabs .chip").forEach(c=>c.classList.remove("on"));
-  chip.classList.add("on");
+  if(chip) chip.classList.add("on");
   document.getElementById("cat-"+cid)?.scrollIntoView({behavior:"smooth"});
 }
 
@@ -596,8 +608,11 @@ function goHome(){
 }
 
 /* ---------- search ---------- */
-const INDEX = [];
-D.sections.forEach(s=>s.cats.forEach(c=>c.items.forEach(it=>INDEX.push({...it, sec:s, cat:c}))));
+let INDEX = [];
+function buildIndex(){
+  INDEX = [];
+  D.sections.forEach(s=>s.cats.forEach(c=>c.items.forEach(it=>INDEX.push({...it, sec:s, cat:c}))));
+}
 const norm = t => t.replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/\s+/g," ").trim().toLowerCase();
 
 function openSearch(){
@@ -609,21 +624,22 @@ function closeSearch(){ $("#search").classList.remove("on"); }
 $("#sinput").addEventListener("input", e=>renderSearch(e.target.value));
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSearch(); });
 
+let lastHits = [];
 function renderSearch(q){
   q = norm(q);
   const box = $("#sres");
   if(!q){
-    box.innerHTML = `<div class="empty"><div class="e">🍔</div>اكتب اسم أي صنف وهيظهر فورًا<br>من ${INDEX.length} صنف</div>`;
+    lastHits = [];
+    box.innerHTML = `<div class="empty"><div class="e">🍔</div>اكتب اسم أي صنف وهيظهر فورًا<br>من ${esc(INDEX.length)} صنف</div>`;
     return;
   }
-  const hits = INDEX.filter(it=>norm(it.n).includes(q) || (it.d && norm(it.d).includes(q))).slice(0,30);
-  box.innerHTML = hits.length ? hits.map((it,i)=>`
-    <div class="item" style="animation-delay:${Math.min(i*0.03,0.3)}s;cursor:pointer"
-         onclick="closeSearch();openSec('${it.sec.id}','${it.n.replace(/'/g,"\\'")}')">
+  lastHits = INDEX.filter(it=>norm(it.n).includes(q) || (it.d && norm(it.d).includes(q))).slice(0,30);
+  box.innerHTML = lastHits.length ? lastHits.map((it,i)=>`
+    <div class="item" style="animation-delay:${Math.min(i*0.03,0.3)}s;cursor:pointer" data-hit="${i}">
       <div class="tx">
-        <div class="crumb">${it.sec.emoji} ${it.sec.title} ← ${it.cat.title}</div>
-        <div class="nm">${it.n}</div>
-        ${it.d?`<div class="ds">${it.d}</div>`:""}
+        <div class="crumb">${esc(it.sec.emoji)} ${esc(it.sec.title)} ← ${esc(it.cat.title)}</div>
+        <div class="nm">${esc(it.n)}</div>
+        ${it.d?`<div class="ds">${esc(it.d)}</div>`:""}
       </div>
       ${priceHTML(it)}
     </div>`).join("")
@@ -631,14 +647,16 @@ function renderSearch(q){
 }
 
 /* ---------- contact ---------- */
-$("#addrTxt").textContent = D.brand.address;
-$("#fbLink").href = D.brand.facebook;
-$("#mapLink").href = "https://www.google.com/maps/search/" + encodeURIComponent("مطعم فرندس بني سويف");
-$("#phones").innerHTML = D.brand.phones.map(p=>`
-  <a class="phone" href="tel:${p}">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
-    ${p}
-  </a>`).join("");
+function renderContact(){
+  $("#addrTxt").textContent = D.brand.address;
+  $("#fbLink").href = safeUrl(D.brand.facebook);
+  $("#mapLink").href = "https://www.google.com/maps/search/" + encodeURIComponent(D.brand.nameAr || "مطعم فرندس بني سويف");
+  $("#phones").innerHTML = D.brand.phones.map(p=>`
+    <a class="phone" href="tel:${escAttr(safeTel(p))}">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2.2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
+      ${esc(p)}
+    </a>`).join("");
+}
 $("#yr").textContent = new Date().getFullYear();
 
 /* ---------- scroll fx ---------- */
@@ -646,6 +664,105 @@ window.addEventListener("scroll", ()=>{
   $("#topbar").classList.toggle("solid", scrollY > 40);
   $("#totop").classList.toggle("on", scrollY > 500);
 }, {passive:true});
+
+/* ---------- delegated events (no inline handlers on data-driven content) ---------- */
+document.addEventListener("click", e=>{
+  const hit = e.target.closest("#sres [data-hit]");
+  if(hit){
+    const it = lastHits[Number(hit.dataset.hit)];
+    if(it){ closeSearch(); openSec(it.sec.id, it.n); }
+    return;
+  }
+  const chip = e.target.closest("#subtabs .chip[data-cat]");
+  if(chip){ jumpCat(chip.dataset.cat, chip); return; }
+  const sec = e.target.closest("[data-sec]");
+  if(sec){ openSec(sec.dataset.sec); return; }
+});
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Enter" && e.key!==" ") return;
+  const sec = e.target.closest && e.target.closest(".sec-card[data-sec]");
+  if(!sec) return;
+  e.preventDefault();
+  openSec(sec.dataset.sec);
+});
+
+/* ---------- data loading (data/menu.json — single source of truth, editable from admin.html) ---------- */
+const CACHE_KEY = "fm.menu.cache.v1";
+const DRAFT_KEY = "fm.menu.draft.v1";
+
+function isValidMenu(d){
+  return !!d && d.brand && Array.isArray(d.sections) && d.sections.length>0
+    && d.sections.every(s => s && safeId(s.id) && Array.isArray(s.cats)
+      && s.cats.every(c => c && safeId(c.id) && Array.isArray(c.items)));
+}
+/* Coerce every field to the type we expect, so bad/tampered data can't break rendering. */
+function normalize(d){
+  return {
+    brand: {
+      nameAr: String(d.brand.nameAr||""), nameEn: String(d.brand.nameEn||""),
+      tagline: String(d.brand.tagline||""), address: String(d.brand.address||""),
+      facebook: String(d.brand.facebook||""),
+      phones: Array.isArray(d.brand.phones) ? d.brand.phones.map(String) : [],
+      currency: String(d.brand.currency||"ج")
+    },
+    sections: d.sections.map(s=>({
+      id: safeId(s.id), title: String(s.title||""), emoji: String(s.emoji||"🍽️"),
+      img: String(s.img||""), desc: String(s.desc||""), sized: !!s.sized,
+      cats: (Array.isArray(s.cats)?s.cats:[]).map(c=>({
+        id: safeId(c.id), title: String(c.title||""), isNew: !!c.isNew,
+        items: (Array.isArray(c.items)?c.items:[]).map(it=>{
+          const o = { n: String(it.n||"") };
+          if(it.d) o.d = String(it.d);
+          if(it.tag) o.tag = String(it.tag);
+          if(Array.isArray(it.s)) o.s = it.s.map(v=> v==null ? null : Number(v));
+          else o.p = Number(it.p)||0;
+          return o;
+        })
+      }))
+    }))
+  };
+}
+
+async function loadMenu(){
+  let data = null;
+  // The dashboard's preview iframe passes ?preview=1 to see unpublished drafts.
+  if(new URLSearchParams(location.search).has("preview")){
+    try{ const d = JSON.parse(localStorage.getItem(DRAFT_KEY)); if(isValidMenu(d)) data = d; }catch(e){}
+  }
+  if(!data){
+    try{
+      const r = await fetch("data/menu.json", {cache:"no-cache"});
+      if(r.ok){ const j = await r.json(); if(isValidMenu(j)) data = j; }
+    }catch(e){}
+  }
+  if(data){
+    try{ localStorage.setItem(CACHE_KEY, JSON.stringify(data)); }catch(e){}
+  }else{
+    // network hiccup — fall back to the last good copy so the QR never shows a blank menu
+    try{ const c = JSON.parse(localStorage.getItem(CACHE_KEY)); if(isValidMenu(c)) data = c; }catch(e){}
+  }
+  if(!data) return false;
+  D = normalize(data);
+  CUR = D.brand.currency;
+  return true;
+}
+
+/* ---------- boot ---------- */
+(async function boot(){
+  const ok = await loadMenu();
+  if(ok){
+    renderHome();
+    buildIndex();
+    renderContact();
+  }else{
+    $("#grid").innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:30px 10px;color:var(--txt3);line-height:2">تعذّر تحميل المنيو 🙏<br>اتأكد من الاتصال بالإنترنت وحدّث الصفحة.</p>';
+  }
+})();
+
+// let the admin dashboard's preview iframe refresh instantly after each edit
+window.addEventListener("message", e=>{
+  if(e.origin === location.origin && e.data === "fm:refresh") location.reload();
+});
 </script>
 </body>
 </html>
