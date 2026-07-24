@@ -3,63 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>♥</title>
+<title>مغلق</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0D0C0A">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M6 14 C34 -4 74 0 95 22 L64 36 C54 27 42 26 33 32 L46 88 Z' fill='%23F97316'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Changa:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Changa:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:#000;overflow:hidden}
+html,body{height:100%}
 body{
-  display:grid;place-items:center;
+  background:#0D0C0A;
   font-family:'Changa',sans-serif;
-  cursor:default;user-select:none;
+  display:grid;place-items:center;
+  overflow:hidden;user-select:none;
+  padding:24px;
 }
-.glow{
-  position:relative;
-  font-size:clamp(38px,11vw,120px);
-  font-weight:800;
-  letter-spacing:.02em;
-  color:#FF0033;
-  text-shadow:
-    0 0 6px  #FF0033,
-    0 0 18px #FF0033,
-    0 0 40px #FF0033,
-    0 0 80px rgba(255,0,51,.75),
-    0 0 140px rgba(255,0,51,.45);
-  animation:breathe 2.6s ease-in-out infinite;
-}
-@keyframes breathe{
-  0%,100%{
-    opacity:1;
-    text-shadow:
-      0 0 6px  #FF0033,
-      0 0 18px #FF0033,
-      0 0 40px #FF0033,
-      0 0 80px rgba(255,0,51,.75),
-      0 0 140px rgba(255,0,51,.45);
-  }
-  50%{
-    opacity:.93;
-    text-shadow:
-      0 0 4px  #FF0033,
-      0 0 12px #FF0033,
-      0 0 28px #FF0033,
-      0 0 55px rgba(255,0,51,.55),
-      0 0 100px rgba(255,0,51,.3);
-  }
-}
-/* faint red haze behind the text */
+/* soft orange haze from the top, brand-style */
 .halo{
   position:fixed;inset:0;pointer-events:none;
-  background:radial-gradient(circle at 50% 50%, rgba(255,0,51,.09), transparent 55%);
+  background:radial-gradient(circle at 50% 18%, rgba(249,115,22,.16), transparent 58%);
+}
+/* subtle grain */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.box{position:relative;text-align:center;animation:in .8s cubic-bezier(.2,1,.3,1) both}
+@keyframes in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+.logo{width:96px;height:88px;filter:drop-shadow(0 10px 26px rgba(249,115,22,.38))}
+
+.name{
+  font-size:clamp(30px,8vw,52px);font-weight:800;letter-spacing:.03em;
+  color:#F5EDE0;direction:ltr;margin-top:4px;line-height:1;
+}
+.name i{color:#F97316;font-style:normal}
+.rest{
+  color:#F97316;font-weight:600;font-size:clamp(10px,2.6vw,13px);
+  letter-spacing:.5em;text-transform:uppercase;margin-top:4px;
+}
+
+/* orange divider */
+.rule{
+  width:min(280px,70vw);height:2px;margin:30px auto 26px;
+  background:linear-gradient(to left,transparent,#F97316,transparent);
+  opacity:.65;
+}
+
+.closed{
+  font-size:clamp(62px,20vw,150px);font-weight:800;line-height:1;
+  color:#FFFFFF;letter-spacing:.02em;
+  text-shadow:0 0 30px rgba(255,255,255,.22), 0 0 80px rgba(249,115,22,.28);
+}
+.sub{
+  margin-top:18px;color:#B8AE9C;font-weight:600;
+  font-size:clamp(14px,3.6vw,19px);line-height:1.9;
+}
+.badge{
+  display:inline-block;margin-top:26px;
+  border:1px solid rgba(249,115,22,.42);
+  background:rgba(249,115,22,.10);
+  color:#F97316;font-weight:700;
+  font-size:clamp(11px,3vw,14px);
+  padding:9px 22px;border-radius:999px;
 }
 </style>
 </head>
 <body>
   <div class="halo"></div>
-  <h1 class="glow">بحبك يا قمر</h1>
+
+  <div class="box">
+    <svg class="logo" viewBox="0 0 100 92" aria-hidden="true">
+      <path d="M6 14 C34 -4 74 0 95 22 L64 36 C54 27 42 26 33 32 L46 88 Z" fill="#F97316"/>
+      <path d="M50 30 L80 25 L60 50 Z" fill="#0D0C0A"/>
+    </svg>
+    <div class="name">FR<i>I</i>ENDS</div>
+    <div class="rest">Restaurant</div>
+
+    <div class="rule"></div>
+
+    <h1 class="closed">مغلق</h1>
+    <p class="sub">المنيو غير متاح حاليًا</p>
+    <span class="badge">نعتذر عن الإزعاج</span>
+  </div>
 </body>
 </html>
